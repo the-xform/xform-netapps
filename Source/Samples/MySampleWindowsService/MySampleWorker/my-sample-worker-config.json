@@ -1,0 +1,79 @@
+{
+  // Worker Settings
+  "Workers": {
+	"SampleWorker": {
+	  /* WorkerConfig parameters - defined in Common.Service - Type of factory for this worker */
+	  "Id": "DBD04231-80AD-4700-BAD8-4E229F16CE15",
+	  "Name": "SampleWorker",
+	  "Schedule": {
+		"Type": "Interval", // Just start the worker. Every ping job has it's own schedule.
+		"Interval": {
+		  "TimeStart": "00:00:00.000", // Initial start delay
+		  "Duration": "0.00:00:02.00" // ... then every interval
+		}
+	  },
+
+	  // Type of factory for this worker
+	  "FactoryType": "MySampleWorker.SampleWorkerFactory", // Factory that is responsible for creating the worker.
+	  //"AssemblyPath": "Rohit2",//"Worker\\MySampleWorker.dll", // Path of the worker assembly relative to service host. In debug mode, it passed from the launch settings of the debug project. The folder structure is created during the packaging of windows service.
+
+	  // ServiceInjector - Injects the services needed by this worker, at the worker level. Must be in the same assembly as this worker.
+	  "WorkerServiceInjectorType": "MySampleWorker.SampleWorkerServiceInjector",
+
+	  "SampleWorkerSettings": {
+		"RetryCount": 3, // Number of retry attempts to send an email.
+		"DefaultFirstName": "John" // Default first name to use if not provided in the ping job.
+	  }
+	}
+  }
+}
+
+/*
+  
+"Schedule":
+{
+	"Type": "ENUM: Interval | OneShot | Daily | Weekly | Monthly",
+   	"ScheduleStart": "Optional date when schedule starts. Empty implies now.",
+   	"ScheduleStop": "Optional date if schedule has a hard stop in the future.",
+   	"Interval":
+   	{
+		"TimeStart": "00:00:00.000",  // Initial start delay
+		"Duration": "0.00:00:00.00"	  // ... then every interval
+	},
+	"OneShot":
+	{
+		"TimeStart": "00:00:00.000"	  // Initial start delay, then go.
+	}
+	"Daily":
+	{
+		"TimeStart": "00:00:00.000",  // Initial start delay
+   		"Interval": "1",			  // 1 is every day, 2 is every other day, etc.
+   		"TimesOfTheDay":			  // Optional: extra times.
+   		[
+			"TimeStart": "00:00:00.000",
+			"TimeStart": "00:00:00.000",
+			"TimeStart": "00:00:00.000"
+   			// ...more times here
+   		]
+	}
+	"Weekly":
+	{
+		"TimeStart": "00:00:00.000",  // Initial start delay
+		"Interval": "1",			  // 1 is every week, 2 is every other week, etc.
+		"DaysOfTheWeek": "Every day if empty. Comma separated otherwise. Like: 'Monday, Friday'"
+	}
+	"Monthly":
+	{
+		"TimeStart": "00:00:00.000",		  // Initial start delay
+		"MonthsOfTheYear": "January | Fe...", // "Every month if empty. Comma separated otherwise.",
+		"DayOfTheMonth": "1",				  // Use 'DayNumber' alone or set it to 0 and use 'OnThe' and 'DayOfTheWeek' together.
+		{
+			"DayNumber": "1",				  // 1 - 31
+			"OnThe": "First | Second",		  // First | Second | Third | Fourth | Last
+			"DayOfTheWeek": "Monday | Tuesday"// Monday | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday
+		}
+	}
+}
+
+
+*/

@@ -1,0 +1,90 @@
+{
+  "ServiceName": "Sample Windows Service",
+  "Description": "Some description for a sample Windows service.",
+
+  "DOTNET_ENVIRONMENT": "Development",
+  "ASPNETCORE_ENVIRONMENT": "Development",
+
+  // AssemblyProvider configuration is used to load any dependencies (assemblies) at the startup of the host application.
+  "AssemblyProvider": {
+	"FileProviders": [
+	  {
+		"Key": "PhysicalAssemblies",
+		"IsWritable": false,
+
+		// File provider factory that will load the assemblies from a physical folder.
+		// This type must implement the interface XForm.Core.Interfaces.IFileProviderFactory.
+		"Factory": "XForm.NetApps.Providers.File.PhysicalFileProviderFactory"
+
+		// The default root folder for all assemblies to be loaded from. This must be provided either in the launchSettings.json of the debug project OR the command line options of the host.
+		// Use value "BASE_DIRECTORY" to indicate the base directory of the host application.
+		// "Root": "" 
+	  }
+	]
+  },
+
+  // Path to app.config of the worker, relative to service-host or absolute. The folder structure is created during the packaging of windows service where the worker can be put in a separate folder.
+  "AppConfigPath": "Worker\\MySampleWorker.dll.config",
+
+  // ServiceInjector - Injects the common services, needed by the WorkerHost and Workers, at the host level.
+  "ServiceInjector": {
+	"AssemblyPath": "MySampleWindowsService.dll", // Path of assembly containing the service injector for the email worker, relative to service host. The folder structure is created during the packaging of windows service on build server.
+	"TypeName": "MySampleWindowsService.ServiceHostServiceInjector"
+  },
+
+  // Logger
+  "SeriLog": {
+	"Using": [ "Serilog.Sinks.Console", "Serilog.Sinks.File" ],
+	"MinimumLevel": "Information",
+	"WriteTo": [
+	  {
+		"Name": "Console",
+		"Args": {
+		  "outputTemplate": "[{Timestamp:o}] | {Level:u1} | {ThreadId} | {ThreadName} | {Message:l} | {Properties:jl} | {Exception} | *****End-of-Log-Entry*****{NewLine}"
+		}
+	  },
+	  {
+		"Name": "File",
+		"Args": {
+		  "path": "..\\Logs\\SampleServiceLogFile..log",
+		  "rollingInterval": "Day",
+		  "outputTemplate": "{Timestamp:o} | {Level:u1} | {ThreadId} | {ThreadName} | {Message:l} | {Properties:jl} | {Exception} | *****End-of-Log-Entry*****{NewLine}",
+		  "retainedFileCountLimit": 30
+		}
+	  }
+	]
+  },
+
+  // ConnectionStrings
+  "ConnectionStrings": {
+	"M3DbConnectionString": "Any Db ConnectionString"
+  },
+
+  // Worker Settings
+  "Workers": {
+	"SampleWorker": {
+	  /* WorkerConfig parameters - defined in Common.Service - Type of factory for this worker */
+	  "Id": "DBD04231-80AD-4700-BAD8-4E229F16CE15",
+	  "Name": "SampleWorker",
+	  "Schedule": {
+		"Type": "Interval", // Just start the worker. Every ping job has it's own schedule.
+		"Interval": {
+		  "TimeStart": "00:00:00.000", // Initial start delay
+		  "Duration": "0.00:00:01.00" // ... then every X.
+		}
+	  },
+
+	  // Type of factory for this worker
+	  "FactoryType": "MySampleWorker.SampleWorkerFactory", // Factory that is responsible for creating the worker.
+	  //"AssemblyPath": "Rohit1",//"Worker\\MySampleWorker.dll", // Path of the worker assembly relative to service host. In debug mode, it passed from the launch settings of the debug project. The folder structure is created during the packaging of windows service.
+
+	  // ServiceInjector - Injects the services needed by this worker, at the worker level. Must be in the same assembly as this worker.
+	  "WorkerServiceInjectorType": "MySampleWorker.SampleWorkerServiceInjector",
+
+	  "SampleWorkerSettings": {
+		"RetryCount": 3, // Number of retry attempts to send an email.
+		"DefaultFirstName": "John" // Default first name to use if not provided in the ping job.
+	  }
+	}
+  }
+}

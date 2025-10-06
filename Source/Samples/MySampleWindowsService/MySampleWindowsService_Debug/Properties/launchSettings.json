@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "MySampleService": {
+      "commandName": "Executable",
+      "executablePath": "$(SolutionDir)Source\\Samples\\MySampleWindowsService\\MySampleWindowsService\\bin\\Debug\\net8.0\\MySampleWindowsService.exe",
+      "commandLineArgs": "/JsonServiceConfig=\"$(SolutionDir)Source\\Samples\\MySampleWindowsService\\MySampleWindowsService\\sample-win-service-config.development.json\" /AdditionalJsonConfigs:0=\"$(SolutionDir)Source\\Samples\\MySampleWindowsService\\MySampleWindowsService\\bin\\Debug\\net8.0\\sample-win-service-config.development.json\" /AdditionalJsonConfigs:1=\"$(SolutionDir)Source\\Samples\\MySampleWindowsService\\MySampleWorker\\bin\\Debug\\net8.0\\my-sample-worker-config.json\" /AdditionalJsonConfigs:2=\"$(SolutionDir)Source\\Samples\\MySampleWindowsService\\MySampleWorker\\bin\\Debug\\net8.0\\my-sample-additional-config.json\" /AppConfigPath=\"$(SolutionDir)Source\\Samples\\MySampleWindowsService\\MySampleWindowsService\\bin\\Debug\\net8.0\\MySampleWindowsService.dll.config\" /AssemblyProvider:FileProviders:0:Root=\"$(SolutionDir)Source\\Samples\\MySampleWindowsService\\MySampleWindowsService\\bin\\Debug\\net8.0\" /Workers:SampleWorker:AssemblyPath=\"$(SolutionDir)Source\\Samples\\MySampleWindowsService\\MySampleWorker\\bin\\Debug\\net8.0\\MySampleWorker.dll\"",
+      "workingDirectory": "$(SolutionDir)Source\\Samples\\MySampleWindowsService\\MySampleWindowsService\\bin\\Debug\\net8.0",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      },
+      "dotnetRunMessages": true
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MySampleConsoleApp": {
+      "commandName": "Project",
+      "commandLineArgs": "/AdditionalJsonConfigs:0=\"additional-command-args-settings.json\""
+    }
+  }
+}

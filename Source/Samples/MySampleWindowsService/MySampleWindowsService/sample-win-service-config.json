@@ -1,0 +1,61 @@
+{
+  "ServiceName": "Sample Windows Service",
+  "Description": "Some description for a sample Windows service.",
+
+  "DOTNET_ENVIRONMENT": "Development",
+  "ASPNETCORE_ENVIRONMENT": "Development",
+
+  // AssemblyProvider configuration is used to load any dependencies (assemblies) at the startup of the host application.
+  "AssemblyProvider": {
+    "FileProviders": [
+      {
+        "Key": "PhysicalAssemblies",
+        "IsWritable": false,
+
+        // File provider factory that will load the assemblies from a physical folder.
+        // This type must implement the interface XForm.Core.Interfaces.IFileProviderFactory.
+        "Factory": "XForm.NetApps.Providers.File.PhysicalFileProviderFactory",
+
+        // The default root folder for all assemblies to be loaded from. This must be provided either in the launchSettings.json of the debug project OR the command line options of the host.
+        // Use value "BASE_DIRECTORY" to indicate the base directory of the host application.
+        "Root": "BASE_DIRECTORY"
+      }
+    ]
+  },
+
+  // Path to app.config of the worker, relative to service-host or absolute. The folder structure is created during the packaging of windows service where the worker can be put in a separate folder.
+  "AppConfigPath": "Worker\\MySampleWorker.dll.config",
+
+  // ServiceInjector - Injects the common services, needed by the WorkerHost and Workers, at the host level.
+  "ServiceInjector": {
+    "AssemblyPath": "MySampleWindowsService.dll", // Path of assembly containing the service injector for the email worker, relative to service host. The folder structure is created during the packaging of windows service on build server.
+    "TypeName": "MySampleWindowsService.ServiceHostServiceInjector"
+  },
+
+  // Logger
+  "SeriLog": {
+    "Using": [ "Serilog.Sinks.File" ],
+    "MinimumLevel": "Information",
+    "WriteTo": [
+      {
+        "Name": "File",
+        "Args": {
+          "path": "..\\Logs\\SampleServiceLogFile..log", // Two '.' have been intentionally added before extension. This helps Serilog to put date in the middle.
+          "rollingInterval": "Day",
+          "outputTemplate": "{Timestamp:o} | {Level:u1} | {ThreadId} | {ThreadName} | {Message:l} | {Properties:jl} | {Exception} | *****End-of-Log-Entry*****{NewLine}",
+          "retainedFileCountLimit": 30
+        }
+      }
+    ]
+  },
+
+  // ConnectionStrings
+  "ConnectionStrings": {
+    "DbConnectionString": "Any Db ConnectionString"
+  },
+
+  // Worker Settings
+  // This setting could either be specified here, or in a separate config file for the worker and then loaded through AdditionalConfigs commandline parameter.
+  "Workers": {
+  }
+}

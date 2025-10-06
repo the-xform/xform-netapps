@@ -1,0 +1,5 @@
+﻿Notes:
+- The structure of all the config files loaded in the Windows Service is JSON format and all the config files are combined into a single JSON object in IConfiguration object.
+- The names and id of the Workers in the worker config files must be unique.
+- To register a Windows service manually, execute the following command on elevated command prompt -
+	sc.exe create "My Sample Windows Service" binPath="<Path to MySampleWindowsService.exe> /JsonServiceConfig=""sample-win-service-config.development.json"" /AdditionalJsonConfigs:0="""Worker\additional-command-args-settings.json;Worker\additional-config-settings.json"""
