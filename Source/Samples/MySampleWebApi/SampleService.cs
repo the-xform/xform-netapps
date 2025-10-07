@@ -1,11 +1,11 @@
 ﻿namespace MySampleWebApi;
 
-internal interface ISampleService
+public interface ISampleService
 {
 	void Run();
 }
 
-internal class SampleService : ISampleService
+public class SampleService : ISampleService
 {
 	private readonly IConfiguration _config;
 	private readonly ILogger<SampleService> _logger;

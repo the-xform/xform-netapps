@@ -35,7 +35,7 @@ logger.LogInformation("***** Starting Sample Windows Service Host *****");
 
 ApplicationBuilder.ConfigureThreadsForApplication(25, 25);
 
-var windows_service_builder = WindowsServiceBuilder.CreateHostBuilder(new WindowsServiceOptions
+var windows_service_builder = WindowsServiceBuilder.CreateAppHostBuilder(new WindowsServiceOptions
 {
 	ServiceName = "MySampleWindowsService",
 	Args = args,

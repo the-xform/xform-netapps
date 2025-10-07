@@ -7,52 +7,29 @@ var webapi_builder = WebApiBuilder.CreateHostBuilder(new WebApiOptions
 	Args = args
 });
 
-var app = webapi_builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+webapi_builder.ConfigureWebHostDefaults(webBuilder =>
 {
-	app.UseSwagger();
-	app.UseSwaggerUI();
-}
+	webBuilder
+	.ConfigureServices(services =>
+	{
+		services.AddControllers();
+	})
+	.Configure((webHostBuilderContext, applicationBuilder) =>
+	{
+		if (webHostBuilderContext.HostingEnvironment.IsDevelopment())
+		{
+			applicationBuilder.UseDeveloperExceptionPage();
+		}
 
-app.UseHttpsRedirection();
+		applicationBuilder.UseHttpsRedirection();
+		applicationBuilder.UseStaticFiles();
+		applicationBuilder.UseRouting();
 
-app.UseAuthorization();
+		applicationBuilder.UseEndpoints(endpoints =>
+		{
+			endpoints.MapControllers();
+		});
+	});
+});
 
-app.MapControllers();
-
-app.Run();
-
-
-
-
-
-
-//var builder = WebApplication.CreateBuilder(args);
-
-//builder.Host.UseContentRoot(AppContext.BaseDirectory);
-
-//// Add services to the container.
-
-////builder.Services.AddControllers();
-//// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-////builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
-
-//var app = builder.Build();
-
-//// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//	app.UseSwagger();
-//	app.UseSwaggerUI();
-//}
-
-//app.UseHttpsRedirection();
-
-//app.UseAuthorization();
-
-//app.MapControllers();
-
-//app.Run();
+webapi_builder.Build().Run();

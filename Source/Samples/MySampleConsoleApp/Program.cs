@@ -43,7 +43,7 @@ var console_app_builder = ConsoleAppBuilder.CreateHostBuilder(new ConsoleAppOpti
 
 // Application services are injected in SampleExternalServiceInjector which invoked from within CommonAppBuilder.
 // The service injector is configured in the app settings file.
-var host = console_app_builder.Build();
+ var host = console_app_builder.Build();
 
 var sample_service = host.Services.GetRequiredService<ISampleService>();
 sample_service.Run();

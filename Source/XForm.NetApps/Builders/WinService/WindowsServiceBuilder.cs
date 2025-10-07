@@ -25,13 +25,13 @@ namespace XForm.NetApps.Builders.WinService
 		/// <param name="hostBuilder"></param>
 		/// <param name="windowsServiceOptions"></param>
 		/// <returns></returns>
-		public static HostApplicationBuilder CreateHostBuilder(WindowsServiceOptions windowsServiceOptions)
+		public static HostApplicationBuilder CreateAppHostBuilder(WindowsServiceOptions windowsServiceOptions)
 		{
 			Xssert.IsNotNull(windowsServiceOptions.ServiceName, nameof(windowsServiceOptions.ServiceName));
 
 			// Inject appsettings.json, config files, additional json configs,
 			// and core services like IJsonUtilities, ISequentialGuidGenerator, and Serilog logger.
-			var host_app_builder = CommonAppBuilder.CreateCommonApplicationBuilder(windowsServiceOptions.ServiceName, windowsServiceOptions.Args);
+			var host_app_builder = CommonAppBuilder.CreateHostApplicationBuilder(windowsServiceOptions.ServiceName, windowsServiceOptions.Args);
 
 			#region - Configure Workers -
 
@@ -61,10 +61,7 @@ namespace XForm.NetApps.Builders.WinService
 			var composite_file_provider = new CompositeFileProvider(worker_dependency_assembly_files_providers);
 
 			// Add assembly provider for assembly resolution from all worker assembly paths
-			//DoRegisterServiceAssemblyProviders(host_app_builder.Configuration, composite_file_provider);
-
-			// Register assembly providers for assembly resolution.
-			CommonAppBuilder.RegisterAssemblyProviders(host_app_builder, composite_file_provider);
+			//CommonAppBuilder.RegisterAssemblyProviders(host_app_builder, composite_file_provider);
 
 			// Initialize the workers
 			host_app_builder.Services.DoAddAndConfigureWorkers(host_app_builder);
@@ -77,16 +74,6 @@ namespace XForm.NetApps.Builders.WinService
 			windowsServiceOptions.ApplicationSetup(host_app_builder.Configuration, host_app_builder.Services);
 
 			return (HostApplicationBuilder)host_app_builder;
-		}
-
-		/// <summary>
-		/// Builds and returns IHost for a Windows Service application.
-		/// </summary>
-		/// <param name="windowsServiceOptions"></param>
-		/// <returns></returns>
-		public static IHost CreateHost(WindowsServiceOptions windowsServiceOptions)
-		{
-			return CreateHostBuilder(windowsServiceOptions).Build();
 		}
 
 		#endregion - Public Methods -

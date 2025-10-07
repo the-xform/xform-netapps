@@ -3,8 +3,7 @@
 // This file is licensed under the MIT License.
 // See the LICENSE file in the project root for details.
 
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Builder.Extensions;
 using Microsoft.Extensions.Hosting;
 using XForm.Utilities.Validations;
 
@@ -23,23 +22,13 @@ public static class WebApiBuilder
 	/// <param name="hostBuilder"></param>
 	/// <param name="webApiOptions"></param>
 	/// <returns></returns>
-	public static WebApplicationBuilder CreateHostBuilder(WebApiOptions webApiOptions)
+	public static IHostBuilder CreateHostBuilder(WebApiOptions webApiOptions)
 	{
 		Xssert.IsNotNull(webApiOptions.ApiName, nameof(webApiOptions.ApiName));
 
-		var host_app_builder = CommonAppBuilder.CreateCommonApplicationBuilder(webApiOptions.ApiName, webApiOptions.Args);
+		var host_builder = CommonAppBuilder.CreateHostBuilder(webApiOptions.ApiName, webApiOptions.Args);
 
-		// Register assembly providers for assembly resolution.
-		CommonAppBuilder.RegisterAssemblyProviders(host_app_builder);
-
-		var weapi_builder = (WebApplicationBuilder)host_app_builder;
-
-		weapi_builder.Host.UseContentRoot(AppContext.BaseDirectory);
-		weapi_builder.Services.AddControllers();
-		weapi_builder.Services.AddEndpointsApiExplorer();
-
-
-		return (WebApplicationBuilder)host_app_builder;
+		return host_builder;
 	}
 
 	/// <summary>
@@ -50,7 +39,11 @@ public static class WebApiBuilder
 	/// <returns></returns>
 	public static IHost CreateHost(WebApiOptions webApiOptions)
 	{
-		return CreateHostBuilder(webApiOptions).Build();
+		Xssert.IsNotNull(webApiOptions.ApiName, nameof(webApiOptions.ApiName));
+
+		var host_builder = CreateHostBuilder(webApiOptions).Build();
+
+		return host_builder;
 	}
 
 	#endregion - Public Methods -
