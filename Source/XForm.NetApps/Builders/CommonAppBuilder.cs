@@ -148,15 +148,19 @@ public static class CommonAppBuilder
 		};
 
 		var builder = Host.CreateApplicationBuilder(host_application_builder_settings);
+		builder.ConfigureApplicationBuilder(host_application_builder_settings);
 
-		return DoConfigureHostApplicationBuilder(builder, host_application_builder_settings);
+		return builder;
 	}
 
-	#endregion - Public Methods -
-
-	#region - Private Methods -
-
-	private static HostApplicationBuilder DoConfigureHostApplicationBuilder(HostApplicationBuilder builder, HostApplicationBuilderSettings host_application_builder_settings)
+	/// <summary>
+	/// This extension allows the other builders like WebApplicationBuilder 
+	/// to configure the host exactly the same way as we construct the 
+	/// HostApplicationBuilder.
+	/// </summary>
+	/// <param name="builder"></param>
+	/// <param name="host_application_builder_settings"></param>
+	public static void ConfigureApplicationBuilder(this IHostApplicationBuilder builder, HostApplicationBuilderSettings host_application_builder_settings)
 	{
 		builder.Configuration.AddCommandLine(host_application_builder_settings.Args ?? []);
 
@@ -245,17 +249,18 @@ public static class CommonAppBuilder
 
 		var assembly_provider = new AssemblyProvider(new AppDomainLoadedAssembliesProvider(), new AssemblyLoadContextAssemblyLoader(new CompositeFileProvider(file_providers)));
 		AssemblyLoadContext.Default.Resolving += (context, name) => assembly_provider.Get(name);
-		
+
 		/* 
 		 * NOTE: This is final point for injection of services in ServiceCollection and 
 		 * no more service injection will work beyond this point because 
 		 * hostApplicationBuilder.Services.BuildServiceProvider() will be 
 		 * invoked after this point. 
 		 */
-
-		// Return host
-		return builder;
 	}
+
+	#endregion - Public Methods -
+
+	#region - Private Methods -
 
 	private static IServicesInjector? DoGetServiceInjectorInstance(IConfigurationSection serviceInjectorConfigSection)
 	{

@@ -35,7 +35,15 @@ AppDomain.CurrentDomain.UnhandledException += (sender, eventArgs) =>
 var logger = logger_factory.CreateLogger("MySampleConsoleAppHost");
 logger.LogInformation("***** Starting Console App Host *****");
 
-var console_app_builder = ConsoleAppBuilder.CreateHostBuilder(new ConsoleAppOptions
+// Example 1: Using HostBuilder
+//var console_app_builder = ConsoleAppBuilder.CreateHostBuilder(new ConsoleAppOptions
+//{
+//	AppName = "MySampleConsole",
+//	Args = args
+//});
+
+// Example 2: Using HostApplicationBuilder
+var console_app_builder = ConsoleAppBuilder.CreateAppHostBuilder(new ConsoleAppOptions
 {
 	AppName = "MySampleConsole",
 	Args = args
@@ -43,7 +51,7 @@ var console_app_builder = ConsoleAppBuilder.CreateHostBuilder(new ConsoleAppOpti
 
 // Application services are injected in SampleExternalServiceInjector which invoked from within CommonAppBuilder.
 // The service injector is configured in the app settings file.
- var host = console_app_builder.Build();
+var host = console_app_builder.Build();
 
 var sample_service = host.Services.GetRequiredService<ISampleService>();
 sample_service.Run();

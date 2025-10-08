@@ -25,9 +25,20 @@ public static class WinFormsAppBuilder
 	{
 		Xssert.IsNotNull(appOptions.AppName, nameof(appOptions.AppName));
 
-		var host_app_builder = CommonAppBuilder.CreateHostApplicationBuilder(appOptions.AppName, appOptions.Args);
+		//var host_app_builder = CommonAppBuilder.CreateHostApplicationBuilder(appOptions.AppName, appOptions.Args);
 
-		return host_app_builder;
+		//return host_app_builder;
+
+		var host_application_builder_settings = new HostApplicationBuilderSettings
+		{
+			ApplicationName = appOptions.AppName,
+			Args = appOptions.Args
+		};
+
+		var builder = Host.CreateApplicationBuilder(host_application_builder_settings);
+		builder.ConfigureApplicationBuilder(host_application_builder_settings);
+
+		return builder;
 	}
 
 	/// <summary>

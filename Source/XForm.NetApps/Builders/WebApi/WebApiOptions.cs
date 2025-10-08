@@ -3,7 +3,7 @@
 // This file is licensed under the MIT License.
 // See the LICENSE file in the project root for details.
 
-namespace XForm.NetApps.Builders.WinForms;
+namespace XForm.NetApps.Builders.WebApi;
 
 public class WebApiOptions : ServiceOptions
 {

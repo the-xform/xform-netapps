@@ -40,7 +40,15 @@ internal static class Program
 		var logger = logger_factory.CreateLogger("MySampleWinFormsApp");
 		logger.LogInformation("***** Starting Windows App Host *****");
 
-		var winforms_app_builder = WinFormsAppBuilder.CreateHostBuilder(new WinFormsAppOptions
+		// Example 1: Using HostBuilder
+		//var winforms_app_builder = WinFormsAppBuilder.CreateHostBuilder(new WinFormsAppOptions
+		//{
+		//	AppName = "MySampleWinformsApp",
+		//	Args = args
+		//});
+
+		//Example 2: Using HostApplicationBuilder
+		var winforms_app_builder = WinFormsAppBuilder.CreateAppHostBuilder(new WinFormsAppOptions
 		{
 			AppName = "MySampleWinformsApp",
 			Args = args

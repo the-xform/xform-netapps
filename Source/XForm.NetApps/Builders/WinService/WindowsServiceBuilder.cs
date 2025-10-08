@@ -31,7 +31,17 @@ namespace XForm.NetApps.Builders.WinService
 
 			// Inject appsettings.json, config files, additional json configs,
 			// and core services like IJsonUtilities, ISequentialGuidGenerator, and Serilog logger.
-			var host_app_builder = CommonAppBuilder.CreateHostApplicationBuilder(windowsServiceOptions.ServiceName, windowsServiceOptions.Args);
+			//var host_app_builder = CommonAppBuilder.CreateHostApplicationBuilder(windowsServiceOptions.ServiceName, windowsServiceOptions.Args);
+
+			var host_application_builder_settings = new HostApplicationBuilderSettings
+			{
+				ApplicationName = windowsServiceOptions.ServiceName,
+				Args = windowsServiceOptions.Args
+			};
+
+			var host_app_builder = Host.CreateApplicationBuilder(host_application_builder_settings);
+			host_app_builder.ConfigureApplicationBuilder(host_application_builder_settings);
+
 
 			#region - Configure Workers -
 
