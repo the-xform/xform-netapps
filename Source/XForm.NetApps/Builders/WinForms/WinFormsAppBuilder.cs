@@ -16,6 +16,21 @@ public static class WinFormsAppBuilder
 	#region - Public Methods -
 
 	/// <summary>
+	/// Builds and returns a IHostBuilder with all injected common services.
+	/// </summary>
+	/// <param name="hostBuilder"></param>
+	/// <param name="appOptions"></param>
+	/// <returns></returns>
+	public static IHostBuilder CreateHostBuilder(WinFormsAppOptions appOptions)
+	{
+		Xssert.IsNotNull(appOptions.AppName, nameof(appOptions.AppName));
+
+		var host_builder = CommonAppBuilder.CreateHostBuilder(appOptions.AppName, appOptions.Args);
+
+		return host_builder;
+	}
+
+	/// <summary>
 	/// Builds and returns a HostApplicationBuilder for a WinForms application with all injected common services..
 	/// </summary>
 	/// <param name="hostBuilder"></param>
@@ -39,21 +54,6 @@ public static class WinFormsAppBuilder
 		builder.ConfigureApplicationBuilder(host_application_builder_settings);
 
 		return builder;
-	}
-
-	/// <summary>
-	/// Builds and returns a IHostBuilder with all injected common services.
-	/// </summary>
-	/// <param name="hostBuilder"></param>
-	/// <param name="appOptions"></param>
-	/// <returns></returns>
-	public static IHostBuilder CreateHostBuilder(WinFormsAppOptions appOptions)
-	{
-		Xssert.IsNotNull(appOptions.AppName, nameof(appOptions.AppName));
-
-		var host_builder = CommonAppBuilder.CreateHostBuilder(appOptions.AppName, appOptions.Args);
-
-		return host_builder;
 	}
 
 	#endregion - Public Methods -

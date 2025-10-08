@@ -132,26 +132,9 @@ public static class CommonAppBuilder
 		return builder;
 	}
 
-	/// <summary>
-	/// Creates a common application builder with injected core services like seri-logger, guid provider, and common services 
-	/// requested to be injected through IServicesInjector implementation provided through config file.
-	/// </summary>
-	/// <param name="applicationName"></param>
-	/// <param name="args"></param>
-	/// <returns></returns>
-	public static HostApplicationBuilder CreateHostApplicationBuilder(string applicationName, string[] args)
-	{
-		var host_application_builder_settings = new HostApplicationBuilderSettings
-		{
-			ApplicationName = applicationName,
-			Args = args,
-		};
+	#endregion - Public Methods -
 
-		var builder = Host.CreateApplicationBuilder(host_application_builder_settings);
-		builder.ConfigureApplicationBuilder(host_application_builder_settings);
-
-		return builder;
-	}
+	#region - Extension Methods -
 
 	/// <summary>
 	/// This extension allows the other builders like WebApplicationBuilder 
@@ -197,31 +180,13 @@ public static class CommonAppBuilder
 		builder.Services.AddCoreServices(builder.Configuration);
 
 		// Inject any external service if an injector is configured
-		var service_injector_config = builder.Configuration.GetSection("ServiceInjector").Get<ServiceInjectorConfig>();
-		Xssert.IsNotNull(service_injector_config);
+		var service_injector_config_section = builder.Configuration.GetSection("ServiceInjector");
+		Xssert.IsNotNull(service_injector_config_section, nameof(service_injector_config_section));
 
-		if (service_injector_config.IsEnabled == true)
-		{
-			var injector_assembly_path = service_injector_config.AssemblyPath;
-			Xssert.IsNotNull(injector_assembly_path, nameof(injector_assembly_path));
-
-			if (Path.IsPathRooted(injector_assembly_path) == false)
-			{
-				injector_assembly_path = Path.Join(AppContext.BaseDirectory, service_injector_config.AssemblyPath);
-			}
-
-			Xssert.FileExists(new PhysicalFileInfo(new FileInfo(injector_assembly_path)), nameof(injector_assembly_path));
-
-			var common_services_injector_type = AssemblyLoadContext.Default.LoadFromAssemblyPath(injector_assembly_path).GetType(service_injector_config.TypeName);
-			Xssert.IsNotNull(common_services_injector_type, nameof(common_services_injector_type));
-
-			var common_services_injector_instance = Activator.CreateInstance(common_services_injector_type!) as IServicesInjector;
-			Xssert.IsNotNull(common_services_injector_instance, nameof(common_services_injector_instance));
-
-			// Setuo the configuration
-			common_services_injector_instance.ConfigureConfiguration(builder.Configuration);
-			common_services_injector_instance.ConfigureServices(builder.Configuration, builder.Services);
-		}
+		// Setup the configuration
+		var common_services_injector_instance = DoGetServiceInjectorInstance(service_injector_config_section);
+		common_services_injector_instance?.ConfigureConfiguration(builder.Configuration);
+		common_services_injector_instance?.ConfigureServices(builder.Configuration, builder.Services);
 
 		// Configure additional external assembly providers if any are configured in the config file.
 		var file_providers = new List<IFileProvider>();
@@ -257,8 +222,8 @@ public static class CommonAppBuilder
 		 * invoked after this point. 
 		 */
 	}
-
-	#endregion - Public Methods -
+	
+	#endregion - Extension Methods -
 
 	#region - Private Methods -
 
@@ -289,69 +254,6 @@ public static class CommonAppBuilder
 		}
 
 		return null;
-	}
-
-	/// <summary>
-	/// Register any additional assembly providers along with the base directory of the deployed application.
-	/// </summary>
-	/// <param name="hostApplicationBuilder"></param>
-	/// <param name="fileProvider"></param>
-	private static void RegisterAssemblyProviders(IHostApplicationBuilder hostApplicationBuilder, IFileProvider? fileProvider = null)
-	{
-		var file_providers = new List<IFileProvider>();
-		if (fileProvider != null)
-		{
-			file_providers.Add(fileProvider);
-		}
-
-		var assembly_provider_section = hostApplicationBuilder.Configuration.GetSection("AssemblyProvider");
-		if (assembly_provider_section.Exists() == true)
-		{
-			var file_provider_sections = assembly_provider_section.GetSection("FileProviders").GetChildren();
-			if (file_provider_sections.Any() == true)
-			{
-				foreach (var file_provider_section in file_provider_sections)
-				{
-					var file_provider_options = file_provider_section.Get<PhysicalFileProviderOptions>();
-					Xssert.IsNotNull(file_provider_options, nameof(file_provider_options));
-
-					var factory = InstanceCreatorHelper.InstantiateType<IFileProviderFactory>(
-												file_provider_options.Factory,
-												file_provider_section);
-					file_providers.Add(factory.Create());
-				}
-			}
-		}
-
-		// Add the base directory of the deployed application as a file provider.
-		file_providers.Add(new PhysicalFileProvider(AppContext.BaseDirectory));
-
-		var assembly_provider = new AssemblyProvider(new AppDomainLoadedAssembliesProvider(), new AssemblyLoadContextAssemblyLoader(new CompositeFileProvider(file_providers)));
-		AssemblyLoadContext.Default.Resolving += (context, name) => assembly_provider.Get(name);
-	}
-
-	/// <summary>
-	/// Register any additional assembly providers. This must be called before the host is built. The responsibility of ensuring that
-	/// the file provider(s) provided here contain the assemblies required for resolution is on the caller.
-	/// </summary>
-	/// <param name="hostApplicationBuilder"></param>
-	/// <param name="fileProvider"></param>
-	private static void RegisterAssemblyProviders(this IHostBuilder hostApplicationBuilder, IFileProvider? fileProvider = null)
-	{
-		var file_providers = new List<IFileProvider>();
-		if (fileProvider != null)
-		{
-			file_providers.Add(fileProvider);
-		}
-
-		hostApplicationBuilder.ConfigureAppConfiguration((hostApplicationBuilder, config) =>
-		{
-			if (file_providers.Count > 0)
-			{
-				var assembly_provider = new AssemblyProvider(new AppDomainLoadedAssembliesProvider(), new AssemblyLoadContextAssemblyLoader(new CompositeFileProvider(file_providers)));
-				AssemblyLoadContext.Default.Resolving += (context, name) => assembly_provider.Get(name);
-			}
-		});
 	}
 
 	#endregion - Private Methods -

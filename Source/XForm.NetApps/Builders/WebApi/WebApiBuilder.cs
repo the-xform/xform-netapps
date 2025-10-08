@@ -30,7 +30,11 @@ public static class WebApiBuilder
 
 		return host_builder;
 	}
-
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="webApiOptions"></param>
+	/// <returns></returns>
 	public static WebApplicationBuilder CreateWebApplicationBuilder(WebApiOptions webApiOptions)
 	{
 		Xssert.IsNotNull(webApiOptions.ApiName, nameof(webApiOptions.ApiName));
@@ -43,21 +47,6 @@ public static class WebApiBuilder
 		});
 
 		return host_app_builder;
-	}
-
-	/// <summary>
-	/// Builds and returns IHost for a WebApi application.
-	/// </summary>
-	/// <param name="hostBuilder"></param>
-	/// <param name="webApiOptions"></param>
-	/// <returns></returns>
-	public static IHost CreateHost(WebApiOptions webApiOptions)
-	{
-		Xssert.IsNotNull(webApiOptions.ApiName, nameof(webApiOptions.ApiName));
-
-		var host_builder = CreateHostBuilder(webApiOptions).Build();
-
-		return host_builder;
 	}
 
 	#endregion - Public Methods -

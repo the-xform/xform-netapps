@@ -16,6 +16,21 @@ public static class ConsoleAppBuilder
 	#region - Public Methods -
 
 	/// <summary>
+	/// Builds and returns a IHostBuilder with all injected common services.
+	/// </summary>
+	/// <param name="hostBuilder"></param>
+	/// <param name="appOptions"></param>
+	/// <returns></returns>
+	public static IHostBuilder CreateHostBuilder(ConsoleAppOptions appOptions)
+	{
+		Xssert.IsNotNull(appOptions.AppName, nameof(appOptions.AppName));
+
+		var host_builder = CommonAppBuilder.CreateHostBuilder(appOptions.AppName, appOptions.Args);
+
+		return host_builder;
+	}
+
+	/// <summary>
 	/// Builds and returns a HostApplicationBuilder for a Console application with all injected common services.
 	/// </summary>
 	/// <param name="hostBuilder"></param>
@@ -35,25 +50,6 @@ public static class ConsoleAppBuilder
 		builder.ConfigureApplicationBuilder(host_application_builder_settings);
 
 		return builder;
-
-		//var host_app_builder = CommonAppBuilder.CreateHostApplicationBuilder(appOptions.AppName, appOptions.Args);
-
-		//return host_app_builder;
-	}
-
-	/// <summary>
-	/// Builds and returns a IHostBuilder with all injected common services.
-	/// </summary>
-	/// <param name="hostBuilder"></param>
-	/// <param name="appOptions"></param>
-	/// <returns></returns>
-	public static IHostBuilder CreateHostBuilder(ConsoleAppOptions appOptions)
-	{
-		Xssert.IsNotNull(appOptions.AppName, nameof(appOptions.AppName));
-
-		var host_builder = CommonAppBuilder.CreateHostBuilder(appOptions.AppName, appOptions.Args);
-
-		return host_builder;
 	}
 
 	#endregion - Public Methods -
