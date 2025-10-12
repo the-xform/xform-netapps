@@ -23,6 +23,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForm.NetApps", "Source\XFo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySampleWebApi", "Source\Samples\MySampleWebApi\MySampleWebApi.csproj", "{052789C1-A403-4A60-BEBA-75ED574658EC}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{40DC8D6C-DAC9-4A41-BE6B-AA65E29B87F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForm.NetApps.Tests.Unit", "Tests\XForm.NetApps.Tests.Unit\XForm.NetApps.Tests.Unit.csproj", "{32D5D73C-D75E-433E-8C3E-57F86F0580D1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +61,10 @@ Global
 		{052789C1-A403-4A60-BEBA-75ED574658EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{052789C1-A403-4A60-BEBA-75ED574658EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{052789C1-A403-4A60-BEBA-75ED574658EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32D5D73C-D75E-433E-8C3E-57F86F0580D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32D5D73C-D75E-433E-8C3E-57F86F0580D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32D5D73C-D75E-433E-8C3E-57F86F0580D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32D5D73C-D75E-433E-8C3E-57F86F0580D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,6 +79,7 @@ Global
 		{5FADB091-BE11-2725-099A-7E4607FDD41A} = {7146BC75-8380-49AE-B6E5-E6548CE3DC5E}
 		{A26DCD95-CAB1-E694-5FC2-CAA3D5BD5A05} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{052789C1-A403-4A60-BEBA-75ED574658EC} = {6D69D883-169B-42CA-85CD-8C8D29E5A1ED}
+		{32D5D73C-D75E-433E-8C3E-57F86F0580D1} = {40DC8D6C-DAC9-4A41-BE6B-AA65E29B87F6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E57A4DA7-1429-4C12-BE98-EF48F4D239DF}

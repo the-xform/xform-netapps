@@ -29,7 +29,7 @@
     <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.9" />
     <PackageReference Include="System.Text.Json" Version="9.0.9" />
-    <PackageReference Include="XForm.Utilities" Version="1.0.1" />
+    <PackageReference Include="XForm.Utilities" Version="2.0.0" />
   </ItemGroup>
 
 </Project>
