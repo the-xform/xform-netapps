@@ -3,7 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MySampleConsoleApp;
 using XForm.NetApps.Builders.Console;
+using XForm.NetApps.Interfaces;
 using XForm.Utilities;
+using XForm.Utilities.Validations;
 
 #region - Global exception handling -
 
@@ -53,6 +55,18 @@ var console_app_builder = ConsoleAppBuilder.CreateAppHostBuilder(new ConsoleAppO
 // The service injector is configured in the app settings file.
 var host = console_app_builder.Build();
 
+// Check if the default injections were added
+var guid_provider = host.Services.GetRequiredService<ISequentialGuidProvider>();
+var json_utilities = host.Services.GetRequiredService<IJsonUtilities>();
+var certificate_provider = host.Services.GetRequiredService<ICertificateProvider>();
+var config_proxy_provider = host.Services.GetRequiredService<IConfigProxyProvider>();
+
+Xssert.IsNotNull(guid_provider);
+Xssert.IsNotNull(json_utilities);
+Xssert.IsNotNull(certificate_provider);
+Xssert.IsNotNull(config_proxy_provider);
+
+// Run sample service
 var sample_service = host.Services.GetRequiredService<ISampleService>();
 sample_service.Run();
 

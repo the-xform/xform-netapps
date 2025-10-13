@@ -8,54 +8,15 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Configuration;
 using System.Xml;
-using Microsoft.Extensions.FileProviders.Physical;
+using XForm.NetApps.Interfaces;
 using XForm.Utilities.Validations;
 
 namespace XForm.NetApps.Providers
 {
-	public interface IConfigProxy
-	{
-		/// <summary>
-		/// App settings read from the <application>.exe.config file.
-		/// </summary>
-		NameValueCollection AppSettings { get; }
-
-		/// <summary>
-		/// Gets or sets the collection of connection strings used to configure database connections.
-		/// </summary>
-		ConnectionStringSettingsCollection ConnectionStrings { get; }
-
-		/// <summary>
-		/// Gets the value of the app setting with the specified key.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="key"></param>
-		/// <returns></returns>
-		/// <exception cref="KeyNotFoundException"></exception>
-		T? GetAppSetting<T>(string key);
-
-		/// <summary>
-		/// Gets the value of the app setting with the specified key. If the key is not found, returns the specified default value.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="key"></param>
-		/// <param name="defaultValue"></param>
-		/// <returns>T</returns>
-		T? GetAppSetting<T>(string key, T defaultValue);
-
-		/// <summary>
-		/// Returns all settings in both environment variables and app settings. 
-		/// The returned dictionary contains two key-value pairs with keys "Environment" and "AppSettings". These key-value pairs contain 
-		/// the key-value pairs from environment and app settings respectively.
-		/// </summary>
-		/// <returns><see cref="Dictionary<string, IDictionary<string, string>>"/> </returns>
-		Dictionary<string, IDictionary<string, string?>> GetAllSettings();
-	}
-
 	/// <summary>
 	/// Allows reading the settings and/or connectionstring from <application>.exe.config and system's environment settings.
 	/// </summary>
-	public class ConfigProxy : IConfigProxy
+	public class ConfigProxyProvider : IConfigProxyProvider
 	{
 		private readonly string _environmentSettingNamePrefix;
 		private readonly NameValueCollection _appSettings;
@@ -78,9 +39,9 @@ namespace XForm.NetApps.Providers
 		#region - Constructors - 
 
 		/// <summary>
-		/// Implementation of IConfigProxy.
+		/// Implementation of IConfigProxyProvider.
 		/// </summary>
-		public ConfigProxy()
+		public ConfigProxyProvider()
 		{
 			_environmentSettingNamePrefix = "";
 			_appSettings = ConfigurationManager.AppSettings;
@@ -88,12 +49,12 @@ namespace XForm.NetApps.Providers
 		}
 
 		/// <summary>
-		/// Implementation of IConfigProxy.
+		/// Implementation of IConfigProxyProvider.
 		/// </summary>
 		/// <param name="pathToApplicationConfigFile">Path to the <application>.exe.config file.</param>
 		/// <param name="environmentSettingNamePrefix">The prefix to the names of environment variables that identifies the application specific keys. Default is empty.</param>
 		/// <exception cref="ArgumentException"></exception>
-		public ConfigProxy(string pathToApplicationConfigFile, string environmentSettingNamePrefix = "")
+		public ConfigProxyProvider(string pathToApplicationConfigFile, string environmentSettingNamePrefix = "")
 		{
 			if (System.IO.File.Exists(pathToApplicationConfigFile) == false)
 			{
@@ -102,8 +63,15 @@ namespace XForm.NetApps.Providers
 
 			_environmentSettingNamePrefix = environmentSettingNamePrefix;
 
+			// In the following way, Configuration object merges multiple configuration sources, including:
+			// Machine.config (global .NET configuration file under C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Config\machine.config)
+			// Other default sources, like system-level connection strings (SQLEXPRESS, etc.)
+			// This will cause more conenctionstrings like SQLEXPRESS may also get loaded. 
 			var config_map = new ExeConfigurationFileMap { ExeConfigFilename = pathToApplicationConfigFile };
 			var config = ConfigurationManager.OpenMappedExeConfiguration(config_map, ConfigurationUserLevel.None);
+
+			//// To ensure that no machine level conenctionstrings get loaded, do the following -
+			//config.ConnectionStrings.SectionInformation.ConfigSource = pathToApplicationConfigFile;
 
 			_appSettings = DoGetAppSettings(config);
 			_connectionStrings = config.ConnectionStrings.ConnectionStrings;

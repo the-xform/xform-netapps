@@ -35,6 +35,6 @@ public class SampleWorkerFactory : IWorkerFactory
 		Xssert.IsNotNull(worker_settings, nameof(worker_settings));
 
 		// Instantiate and return the worker
-		return new SampleWorker(serviceProvider.GetRequiredService<ILogger<SampleWorker>>(), worker_settings.RetryCount, worker_settings.DefaultFirstName);
+		return new SampleWorker(serviceProvider.GetRequiredService<ILogger<SampleWorker>>(), worker_settings.RetryCount, worker_settings.DefaultFirstName ?? "TheWorkerName");
 	}
 }

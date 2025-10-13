@@ -3,7 +3,7 @@
 // This file is licensed under the MIT License.
 // See the LICENSE file in the project root for details.
 
-namespace XForm.NetApps.Builders.WinService;
+namespace XForm.NetApps;
 
 /// <summary>
 /// State of the process for background workers.

@@ -4,22 +4,10 @@
 // See the LICENSE file in the project root for details.
 
 using System.Security.Cryptography;
+using XForm.NetApps.Interfaces;
 using XForm.Utilities.Validations;
 
 namespace XForm.NetApps.Providers;
-
-/// <summary>
-/// Generates a new sequential GUID each time NewSequentialGuid is called.
-/// </summary>
-public interface ISequentialGuidProvider
-{
-	/// <summary>
-	/// Generates a new sequential GUID each time NewSequentialGuid is called.
-	/// </summary>
-	/// <param name="guidType"></param>
-	/// <returns>Guid</returns>
-	Guid NewGuid(SequentialGuidType guidType = SequentialGuidType.SequentialAtEndFromGuid);
-}
 
 
 public class SequentialGuidProvider : ISequentialGuidProvider

@@ -9,13 +9,25 @@ namespace XForm.NetApps.Providers;
 
 public class CertificateProvider : ICertificateProvider
 {
-	private readonly CertificatesSettings? _certificateSettings;
+	private readonly CertificateSettings? _certificateSettings;
 
 	private readonly bool _isProviderEnabled;
 	private readonly List<X509Certificate2> _allCertificates;
-	private readonly StoreLocation _storeLocation;
-	private readonly StoreName _storeName;
+	private readonly StoreLocation _certstoreLoccation;
+	private readonly StoreName _certStoreName;
 	private readonly string? _parentAki;
+
+	#region - Properties -
+
+	/// <summary>
+	/// The location of the configured store.
+	/// </summary>
+	public StoreLocation CertStoreLocation => _certstoreLoccation;
+
+	/// <summary>
+	/// The name of the configured store.
+	/// </summary>
+	public StoreName CertStoreName => _certStoreName;
 
 	public static X509ChainPolicy DefaultChainPolicy { get; private set; } = new X509ChainPolicy
 	{
@@ -24,10 +36,12 @@ public class CertificateProvider : ICertificateProvider
 		VerificationTimeIgnored = false
 	};
 
+	#endregion - Properties -
+
 	#region - Constructors -
 
 	/// <summary>
-	/// Constructor that initializes a new instance of the <see cref="CertificateProvider"/> class with configuration settings. The configuration must contain a <see cref="CertificatesSettings"/> section.
+	/// Constructor that initializes a new instance of the <see cref="CertificateProvider"/> class with configuration settings. The configuration must contain a <see cref="CertificateSettings"/> section.
 	/// </summary>
 	/// <param name="configuration"></param>
 	/// <exception cref="ConfigurationErrorsException"></exception>
@@ -35,16 +49,16 @@ public class CertificateProvider : ICertificateProvider
 	{
 		_allCertificates = new List<X509Certificate2>();
 
-		var certificates_config_section = configuration.GetSection("CertificatesSettings");
+		var certificates_config_section = configuration.GetSection(nameof(CertificateSettings));
 		if (certificates_config_section.Exists() == false)
 		{
-			throw new ConfigurationErrorsException($"No 'CertificatesSettings' section found in the configuration.");
+			throw new ConfigurationErrorsException($"No 'CertificateSettings' section found in the configuration.");
 		}
 
-		var certificate_settings = certificates_config_section.Get<CertificatesSettings>();
+		var certificate_settings = certificates_config_section.Get<CertificateSettings>();
 		if (certificate_settings == null)
 		{
-			throw new ConfigurationErrorsException($"Unable to parse 'CertificatesSettings' section from the configuration.");
+			throw new ConfigurationErrorsException($"Unable to parse '{nameof(CertificateSettings)}' section from the configuration.");
 		}
 
 		_certificateSettings = certificate_settings;
@@ -57,28 +71,28 @@ public class CertificateProvider : ICertificateProvider
 
 		_parentAki = _certificateSettings.CaAuthorityKeyIdentifier;
 
-		if (_certificateSettings.StoreLocation.HasSomething())
+		if (_certificateSettings.CertStoreLocation.HasSomething())
 		{
-			if (TryParseStoreLocation(_certificateSettings.StoreLocation, out _storeLocation) == false)
+			if (TryParseStoreLocation(_certificateSettings.CertStoreLocation, out _certstoreLoccation) == false)
 			{
-				throw new ConfigurationErrorsException($"Invalid certificate store location '{_certificateSettings.StoreLocation}'. Possible values are 'CurrentUser' or 'LocalMachine'.");
+				throw new ConfigurationErrorsException($"Invalid certificate store location '{_certificateSettings.CertStoreLocation}'. Possible values are 'CurrentUser' or 'LocalMachine'.");
 			}
 		}
 		else
 		{
-			_storeLocation = StoreLocation.LocalMachine; // Default value
+			_certstoreLoccation = System.Security.Cryptography.X509Certificates.StoreLocation.LocalMachine; // Default value
 		}
 
-		if (_certificateSettings.StoreName.HasSomething())
+		if (_certificateSettings.CertStoreName.HasSomething())
 		{
-			if (TryParseStoreName(_certificateSettings.StoreName, out _storeName) == false)
+			if (TryParseStoreName(_certificateSettings.CertStoreName, out _certStoreName) == false)
 			{
-				throw new ConfigurationErrorsException($"Invalid certificate store name '{_certificateSettings.StoreName}'. Possible values are 'My', 'Root', 'CA', 'AuthRoot', 'TrustedPeople', or 'TrustedPublisher'.");
+				throw new ConfigurationErrorsException($"Invalid certificate store name '{_certificateSettings.CertStoreName}'. Possible values are 'My', 'Root', 'CA', 'AuthRoot', 'TrustedPeople', or 'TrustedPublisher'.");
 			}
 		}
 		else
 		{
-			_storeName = StoreName.My; // Default value
+			_certStoreName = StoreName.My; // Default value
 		}
 
 		_allCertificates.AddRange(DoGetCertificates(_certificateSettings.Thumbprints));
@@ -87,14 +101,14 @@ public class CertificateProvider : ICertificateProvider
 	/// <summary>
 	/// Initializes a new instance of the <see cref="CertificateProvider"/> class.
 	/// </summary>
-	/// <param name="certificatesSettings">The <see cref="CertificatesSettings"/> object</param>
+	/// <param name="certificateSettings">The <see cref="CertificateSettings"/> object</param>
 	/// <param name="storeLocation">Possible values are 'CurrentUser' or 'LocalMachine'.</param>
 	/// <param name="storeName">Possible values are 'My', 'Root', 'CA', 'AuthRoot', 'TrustedPeople', or 'TrustedPublisher'.</param>
 	/// <exception cref="ConfigurationErrorsException"></exception>
-	public CertificateProvider(CertificatesSettings certificatesSettings)
-		: this(certificatesSettings.Thumbprints, certificatesSettings.StoreLocation, certificatesSettings.StoreName, certificatesSettings.CaAuthorityKeyIdentifier, certificatesSettings.IsEnabled)
+	public CertificateProvider(CertificateSettings certificateSettings)
+		: this(certificateSettings.Thumbprints, certificateSettings.CertStoreLocation, certificateSettings.CertStoreName, certificateSettings.CaAuthorityKeyIdentifier, certificateSettings.IsEnabled)
 	{
-		_certificateSettings = certificatesSettings;
+		_certificateSettings = certificateSettings;
 	}
 
 	/// <summary>
@@ -105,42 +119,38 @@ public class CertificateProvider : ICertificateProvider
 	/// <param name="storeName"></param>
 	/// <param name="parentAki"></param>
 	/// <exception cref="ConfigurationErrorsException"></exception>
-	public CertificateProvider(string[] thumbprints, string? storeLocation = null, string? storeName = null, string? parentAki = null, bool isEnabled = true)
+	public CertificateProvider(string[]? thumbprints, string? storeLocation = null, string? storeName = null, string? parentAki = null, bool isEnabled = true)
 	{
 		_allCertificates = new List<X509Certificate2>();
 		_parentAki = parentAki;
 		_isProviderEnabled = isEnabled;
 
-		if (_isProviderEnabled == true)
+		if (storeLocation.HasSomething())
 		{
-			if (storeLocation.HasSomething())
+			if (TryParseStoreLocation(storeLocation, out _certstoreLoccation) == false)
 			{
-				if (TryParseStoreLocation(storeLocation, out _storeLocation) == false)
-				{
-					throw new ConfigurationErrorsException($"Invalid certificate store location '{storeLocation}'. Possible values are 'CurrentUser' or 'LocalMachine'.");
-				}
+				throw new ConfigurationErrorsException($"Invalid certificate store location '{storeLocation}'. Possible values are 'CurrentUser' or 'LocalMachine'.");
 			}
-			else
-			{
-				_storeLocation = StoreLocation.LocalMachine; // Default value
-			}
-
-			if (storeName.HasSomething())
-			{
-				if (TryParseStoreName(storeName, out _storeName) == false)
-				{
-					throw new ConfigurationErrorsException($"Invalid certificate store name '{storeName}'. Possible values are 'My', 'Root', 'CA', 'AuthRoot', 'TrustedPeople', or 'TrustedPublisher'.");
-				}
-			}
-			else
-			{
-				_storeName = StoreName.My; // Default value
-			}
-
-			_allCertificates.AddRange(DoGetCertificates(thumbprints));
 		}
-	}
+		else
+		{
+			_certstoreLoccation = StoreLocation.LocalMachine;
+		}
 
+		if (storeName.HasSomething())
+		{
+			if (TryParseStoreName(storeName, out _certStoreName) == false)
+			{
+				throw new ConfigurationErrorsException($"Invalid certificate store name '{storeName}'. Possible values are 'My', 'Root', 'CA', 'AuthRoot', 'TrustedPeople', or 'TrustedPublisher'.");
+			}
+		}
+		else
+		{
+			_certStoreName = StoreName.My;
+		}
+
+		_allCertificates.AddRange(DoGetCertificates(thumbprints));
+	}
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="CertificateProvider"/> class.
@@ -153,6 +163,8 @@ public class CertificateProvider : ICertificateProvider
 	}
 
 	#endregion - Constructors -
+
+	#region - Public Methods - 
 
 	/// <summary>
 	/// Gets a certificate from the loaded collection of certificates.
@@ -189,7 +201,7 @@ public class CertificateProvider : ICertificateProvider
 
 		thumbprints.ForEach(tp =>
 		{
-			if (DoTryGetCertificate(tp, _storeLocation, _storeName, out var cert) == true)
+			if (DoTryGetCertificate(tp, _certstoreLoccation, _certStoreName, out var cert) == true)
 			{
 				_allCertificates.Add(cert!);
 			}
@@ -228,6 +240,11 @@ public class CertificateProvider : ICertificateProvider
 			throw new ArgumentNullException(nameof(certificate));
 		}
 
+		if (_isProviderEnabled == false)
+		{
+			throw new InvalidOperationException("The provider is not enabled.");
+		}
+
 		chainStatus = Array.Empty<X509ChainStatus>();
 
 		using var chain = new X509Chain
@@ -236,7 +253,7 @@ public class CertificateProvider : ICertificateProvider
 			{
 				RevocationMode = DefaultChainPolicy.RevocationMode,
 				VerificationFlags = DefaultChainPolicy.VerificationFlags,
-				VerificationTimeIgnored = DefaultChainPolicy.VerificationTimeIgnored
+				VerificationTimeIgnored = DefaultChainPolicy.VerificationTimeIgnored,
 			}
 		};
 
@@ -258,6 +275,11 @@ public class CertificateProvider : ICertificateProvider
 	/// <returns></returns>
 	public bool ValidateCertificate(X509Certificate2? certificate)
 	{
+		if (_isProviderEnabled == false)
+		{
+			throw new InvalidOperationException("The provider is not enabled.");
+		}
+
 		if (certificate == null)
 		{
 			return false;
@@ -284,6 +306,11 @@ public class CertificateProvider : ICertificateProvider
 		string? expectedSki = null,
 		X509Certificate2? issuerCertificate = null)
 	{
+		if (_isProviderEnabled == false)
+		{
+			throw new InvalidOperationException("The provider is not enabled.");
+		}
+
 		Xssert.IsNotNull(certificate);
 
 		// If user didn't pass any expected ski, use parent aki from configuration.
@@ -343,7 +370,7 @@ public class CertificateProvider : ICertificateProvider
 	/// <returns></returns>
 	public bool TryParseStoreLocation(string? location, out StoreLocation storeLocation)
 	{
-		storeLocation = StoreLocation.LocalMachine; // Default value
+		storeLocation = StoreLocation.LocalMachine;
 
 		if (string.IsNullOrWhiteSpace(location))
 		{
@@ -382,7 +409,7 @@ public class CertificateProvider : ICertificateProvider
 	/// <returns></returns>
 	public bool TryParseStoreName(string? name, out StoreName storeName)
 	{
-		storeName = StoreName.My; // Default value
+		storeName = StoreName.My;
 
 		if (string.IsNullOrWhiteSpace(name))
 		{
@@ -440,6 +467,8 @@ public class CertificateProvider : ICertificateProvider
 		}
 	}
 
+	#endregion - Public Methods - 
+
 	#region - Private Methods -
 
 	/// <summary>
@@ -448,17 +477,22 @@ public class CertificateProvider : ICertificateProvider
 	/// <param name="thumbprints"></param>
 	/// <returns></returns>
 	/// <exception cref="ConfigurationErrorsException"></exception>
-	private List<X509Certificate2> DoGetCertificates(string[] thumbprints)
+	private List<X509Certificate2> DoGetCertificates(string[]? thumbprints)
 	{
 		List<X509Certificate2> all_certs = new List<X509Certificate2>();
+
+		if (thumbprints == null)
+		{
+			return all_certs;
+		}
 
 		if (thumbprints.Any(thumbPrint => thumbPrint.HasNothing()) == true)
 		{
 			throw new ConfigurationErrorsException($"Certificate thumbprint(s) cannot be null or empty.");
 		}
 
-		using var store = new X509Store(_storeName, _storeLocation);
-		store.Open(OpenFlags.ReadOnly);
+		using var store = new X509Store(_certStoreName, _certstoreLoccation);
+		store.Open(System.Security.Cryptography.X509Certificates.OpenFlags.ReadOnly);
 
 		foreach (var thumbprint in thumbprints)
 		{
@@ -479,7 +513,7 @@ public class CertificateProvider : ICertificateProvider
 	private bool DoTryGetCertificate(string thumbprint, StoreLocation storeLocation, StoreName storeName, out X509Certificate2? x509Certificate2)
 	{
 		using var store = new X509Store(storeName, storeLocation);
-		store.Open(OpenFlags.ReadOnly);
+		store.Open(System.Security.Cryptography.X509Certificates.OpenFlags.ReadOnly);
 
 		return DoTryGetCertificate(thumbprint, store, out x509Certificate2);
 	}
@@ -491,7 +525,7 @@ public class CertificateProvider : ICertificateProvider
 		var thumbprint_to_find = thumbprint.Replace(" ", "").ToUpperInvariant();
 
 		var certs = store.Certificates.Find(
-						X509FindType.FindByThumbprint,
+						System.Security.Cryptography.X509Certificates.X509FindType.FindByThumbprint,
 						thumbprint_to_find,
 						validOnly: false);
 

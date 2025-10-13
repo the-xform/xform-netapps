@@ -7,8 +7,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Core;
-using XForm.NetApps.Providers;
 using XForm.Core.Interfaces;
+using XForm.NetApps.Interfaces;
+using XForm.NetApps.Providers;
 using XForm.Utilities;
 
 namespace XForm.NetApps.Extensions;
@@ -25,8 +26,10 @@ public static class ServiceCollectionExtensions
         // Add all common services here.
         services.AddSingleton<ISequentialGuidProvider, SequentialGuidProvider>();
         services.AddSingleton<IJsonUtilities, JsonUtilities>();
+        services.AddSingleton<IConfigProxyProvider, ConfigProxyProvider>();
+        services.AddSingleton<ICertificateProvider, CertificateProvider>();
 
-        Logger logger = new LoggerConfiguration().ReadFrom.Configuration(globalConfiguration).CreateLogger();
+		Logger logger = new LoggerConfiguration().ReadFrom.Configuration(globalConfiguration).CreateLogger();
 
 		services.AddSerilog(logger);
 

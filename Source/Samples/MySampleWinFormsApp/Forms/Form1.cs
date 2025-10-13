@@ -1,4 +1,4 @@
-using XForm.NetApps.Providers;
+using XForm.NetApps.Interfaces;
 using XForm.Utilities;
 
 namespace MySampleWinFormsApp;

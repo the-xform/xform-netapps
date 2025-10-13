@@ -5,7 +5,7 @@
 
 using System.Reflection;
 
-namespace XForm.NetApps.Builders.WinService;
+namespace XForm.NetApps;
 
 public class AssemblyNameComparer : IEqualityComparer<AssemblyName>
 {

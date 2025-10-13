@@ -1,7 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using XForm.NetApps.Builders.WinForms;
+using XForm.NetApps.Interfaces;
 using XForm.Utilities;
+using XForm.Utilities.Validations;
 
 namespace MySampleWinFormsApp;
 
@@ -59,6 +61,17 @@ internal static class Program
 		// To customize application configuration such as set high DPI settings or default font,
 		// see https://aka.ms/applicationconfiguration.
 		ApplicationConfiguration.Initialize();
+
+		// Check if the default injections were added
+		var guid_provider = host.Services.GetRequiredService<ISequentialGuidProvider>();
+		var json_utilities = host.Services.GetRequiredService<IJsonUtilities>();
+		var certificate_provider = host.Services.GetRequiredService<ICertificateProvider>();
+		var config_proxy_provider = host.Services.GetRequiredService<IConfigProxyProvider>();
+
+		Xssert.IsNotNull(guid_provider);
+		Xssert.IsNotNull(json_utilities);
+		Xssert.IsNotNull(certificate_provider);
+		Xssert.IsNotNull(config_proxy_provider);
 
 		// Load the form via DI. The DI has been configured in SampleExternalServiceInjector which is invoked from within CommonAppBuilder.
 		var main_form = host.Services.GetRequiredService<Form1>();
