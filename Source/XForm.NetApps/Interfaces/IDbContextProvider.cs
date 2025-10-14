@@ -1,4 +1,9 @@
-﻿using System.Data;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) [Rohit Ahuja]
+// This file is licensed under the MIT License.
+// See the LICENSE file in the project root for details.
+
+using System.Data;
 
 namespace XForm.NetApps.Interfaces;
 

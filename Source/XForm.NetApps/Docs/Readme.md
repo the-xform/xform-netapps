@@ -1038,17 +1038,136 @@ app.Run();
 
 
 
+# SqlDbContextProvider
+
+**Namespace:** `XForm.NetApps.Providers`\
+**Implements:** `IDbContextProvider`\
+**License:** MIT\
+**Author:** Rohit Ahuja
+
+------------------------------------------------------------------------
+
+## Overview
+
+`SqlDbContextProvider` is a lightweight, disposable provider class for
+managing SQL Server database connections and transactions.\
+It encapsulates a `SqlConnection` and exposes methods to open/close
+connections, begin/commit/rollback transactions, and ensure proper
+disposal.
+
+This class is intended to be injected or used as a scoped database
+context within .NET applications.
+
+------------------------------------------------------------------------
+
+## Constructor
+
+``` csharp
+public SqlDbContextProvider(string name, string connectionString)
+```
+
+**Parameters** \| Name \| Type \| Description \|
+\|------\|------\|-------------\| \| `name` \| `string` \| A logical
+name identifying this context instance. \| \| `connectionString` \|
+`string` \| The connection string used to create the underlying
+`SqlConnection`. \|
+
+------------------------------------------------------------------------
+
+## Properties
+
+### `string Name`
+Gets the context name assigned at initialization.
+
+### `IDbConnection? Connection`
+The underlying SQL connection.
+
+### `bool IsInTransaction`
+Returns `true` if a transaction is active.
+
+### `IDbTransaction? CurrentTransaction`
+The active transaction object, if any.
+
+------------------------------------------------------------------------
+
+## Methods
+
+### `OpenConnection()`
+
+Opens the underlying SQL connection if it is closed.
+
+### `CloseConnection()`
+
+Closes the connection if it is open.
+
+### `BeginTransaction()`
+
+Begins a new SQL transaction. Throws if a transaction is already in
+progress or if the connection is uninitialized.
+
+### `CommitTransaction()`
+
+Commits the current transaction, if active.
+
+### `RollbackTransaction()`
+
+Rolls back the current transaction, if active.
+
+### `Dispose()`
+
+Releases all managed resources, rolls back any pending transactions, and
+disposes the connection.
+
+------------------------------------------------------------------------
+
+## Usage Example
+
+Adding named context providers in **.NET 8** using keyed
+services and then injecting them in the services/controllers.
+
+``` csharp
+builder.Services.AddKeyedSingleton<IDbContextProvider>("AppDb", (sp, key) =>
+    new SqlDbContextProvider("AppDb", builder.Configuration.GetConnectionString("AppDb"))
+);
+
+builder.Services.AddKeyedSingleton<IDbContextProvider>("LogsDb", (sp, key) =>
+    new SqlDbContextProvider("LogsDb", builder.Configuration.GetConnectionString("LogsDb"))
+);
+
+// Example usage in a controller
+public class UserController
+{
+    private readonly IDbContextProvider _db;
+    private readonly IDbContextProvider _logsDb;
+
+    public UserController([FromKeyedServices("AppDb")] IDbContextProvider db, [FromKeyedServices("LogsDb")] IDbContextProvider logsDb)
+    {
+        _db = db;
+        _logsDb = logsDb;
+    }
+}
+```
+
+------------------------------------------------------------------------
+
+
+
+
+
 # License
 
 MIT License. See the LICENSE file in the project root for details.
 
----
+------------------------------------------------------------------------
 
 
 
 
 # Version History
 
+## Next
+- Added IDbContext to common services that are automatically injected in the host based on new configuration setting 'SqlConnectionSettings'.
+- 
 ## 1.1.0
 - Added ICertificateProvider implementation and added it into auto-injected core implementations in ConsoleAppBuilder.CreateAppHostBuilder, WinFormsAppBuilder.CreateAppHostBuilder, and WebApiBuilder.CreateWebApplicationBuilder implementations.
 - Added unit tests around CertificateProvider, ConfigProxyProvider, and SequentialGuidProvider implementations.
@@ -1063,4 +1182,4 @@ MIT License. See the LICENSE file in the project root for details.
 ## 1.0.0
 - Initial commit for the desired functionality in library.
 
----
+------------------------------------------------------------------------

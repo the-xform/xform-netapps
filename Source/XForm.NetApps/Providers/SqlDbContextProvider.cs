@@ -1,5 +1,9 @@
-﻿using System.Data;
-using System.IO;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) [Rohit Ahuja]
+// This file is licensed under the MIT License.
+// See the LICENSE file in the project root for details.
+
+using System.Data;
 using Microsoft.Data.SqlClient;
 using XForm.NetApps.Interfaces;
 
