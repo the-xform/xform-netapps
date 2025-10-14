@@ -1,4 +1,36 @@
-﻿# CertificateProvider Class Documentation
+﻿# xform-netapps
+
+**xform-netapps** is a C# library providing reusable building blocks and helpers for creating .NET applications of various types (Console, WinForms, Web API). It offers common services (configuration, certificate handling, GUID generation, logging, json serialization and deserialization) and app builders to streamline application startup and hosting. It's a library to accelerate development and standardize application architecture across multiple .NET app types.
+
+------------------------------------------------------------------------
+
+## Features
+
+- Unified configuration support via `IConfiguration` (JSON, environment variables, `.exe.config`).  
+- Default certificate chain validation with customizable behavior.  
+- Reusable sequential GUID generator for database-friendly IDs.  
+- Ready-to-use builders for Console, WinForms, and Web API applications.  
+- Unit-tested components for certificates, configuration, and GUID generation.
+
+------------------------------------------------------------------------
+
+
+## Key Components & Features
+
+| Component / Class | Purpose / Responsibility |
+|------------------|------------------------|
+| **CertificateProvider** | Load and manage X.509 certificates from stores or memory. Validate certificates, check expiration, and validate chains. |
+| **ConfigProxyProvider** | Wrapper for reading configuration settings from `.exe.config`, JSON, and environment variables, with support for sensitive keys. |
+| **SequentialGuidProvider** | Generates sequential GUIDs optimized for database insertion and indexing. |
+| **ConsoleAppBuilder** | Helps build and configure console applications with pre-injected services like certificates and configuration. |
+| **WinFormsAppBuilder** | Similar to ConsoleAppBuilder, but for WinForms applications, providing a ready-to-use host and services. |
+| **WebApiBuilder** | Bootstraps Web API applications with default configuration, DI, and common services. |
+| **CommonAppBuilder / Shared Logic** | Underlying shared logic used by the builders for configuring logging, DI, configuration, and certificates. |
+
+
+------------------------------------------------------------------------
+
+# CertificateProvider Class Documentation
 
 > **Namespace:** `XForm.NetApps.Providers`  
 > **Implements:** `ICertificateProvider`  
