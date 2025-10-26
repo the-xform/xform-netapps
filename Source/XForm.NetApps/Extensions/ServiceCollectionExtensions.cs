@@ -35,17 +35,16 @@ public static class ServiceCollectionExtensions
 		services.AddSingleton<ICertificateProvider, CertificateProvider>();
 
 		// Inject SqlDbContextProvider if configured.
-		var sql_connections_config_section = globalConfiguration.GetSection("SqlConnectionSettings");
+		var sql_connections_config_section = globalConfiguration.GetSection("ConnectionStrings");
 		if (sql_connections_config_section != null)
 		{
 			// Inject IDbContext for each of the connectionstrings provided in configuration.
-			var sql_connection_strings_settings = sql_connections_config_section.Get<SqlConnectionSettings>();
-			if (sql_connection_strings_settings != null
-				&& sql_connection_strings_settings.IsEnabled == true)
+			var sql_connection_strings_settings = sql_connections_config_section.Get<Dictionary<string, string>>();
+			if (sql_connection_strings_settings != null)
 			{
-				Xssert.IsNotNull(sql_connection_strings_settings.ConnectionStrings);
+				Xssert.GreaterThan(sql_connection_strings_settings.Count, 0);
 
-				foreach (KeyValuePair<string, string> connectionStringPair in sql_connection_strings_settings.ConnectionStrings)
+				foreach (KeyValuePair<string, string> connectionStringPair in sql_connection_strings_settings)
 				{
 					Xssert.IsNotNullOrEmpty(connectionStringPair.Value);
 					services.AddKeyedSingleton<IDbContextProvider>($"{connectionStringPair.Key}", (sp, key) => new SqlDbContextProvider(connectionStringPair.Key, connectionStringPair.Value));

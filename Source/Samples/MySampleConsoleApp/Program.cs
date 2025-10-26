@@ -60,6 +60,7 @@ var guid_provider = host.Services.GetRequiredService<ISequentialGuidProvider>();
 var json_utilities = host.Services.GetRequiredService<IJsonUtilities>();
 var certificate_provider = host.Services.GetRequiredService<ICertificateProvider>();
 var config_proxy_provider = host.Services.GetRequiredService<IConfigProxyProvider>();
+var db_provider = host.Services.GetKeyedService<IDbContextProvider>("Db1ConnectionString");
 
 Xssert.IsNotNull(guid_provider);
 Xssert.IsNotNull(json_utilities);

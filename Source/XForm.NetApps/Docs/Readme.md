@@ -547,7 +547,6 @@ string value = provider.GetAppSetting<string>("MissingKey", "default-value");
 
 **Namespace:** `XForm.NetApps.Providers`  
 **Implements:** `ISequentialGuidProvider`  
-**License:** MIT  
 
 
 ## Overview
@@ -1074,8 +1073,6 @@ app.Run();
 
 **Namespace:** `XForm.NetApps.Providers`\
 **Implements:** `IDbContextProvider`\
-**License:** MIT\
-**Author:** Rohit Ahuja
 
 ------------------------------------------------------------------------
 
@@ -1186,6 +1183,105 @@ public class UserController
 
 
 
+# DbContextAttribute
+
+**Namespace:** `XForm.NetApps.Attibutes.Web`\
+
+------------------------------------------------------------------------
+
+## Overview
+
+The ``DbContextAttribute`` is an ASP.NET Core action filter designed to 
+manage database connection and transaction lifecycles for controller actions. 
+It automates opening, committing, rolling back, and closing database 
+connections and transactions based on the action’s execution outcome.
+
+------------------------------------------------------------------------
+
+## Features
+
+- Automatically opens a database connection before an action executes
+- Optionally wraps actions inside a transaction
+- Commits on HTTP 200 (success)
+- Rolls back on exceptions or failed responses
+- Closes the database connection after execution
+- Provides structured logging for lifecycle events
+- Supports multiple database connections using named connection strings
+
+------------------------------------------------------------------------
+
+## Constructor
+
+```csharp
+public DbContextAttribute(
+    bool executeInTransaction = true,
+    string dbConnectionStringName = "XformConnectionString"
+)
+```
+
+------------------------------------------------------------------------
+
+## Properties
+
+### `bool executeInTransaction`
+Determines if the action should be executed within a transaction.
+
+### `string dbConnectionStringName`
+Specifies the name of the connection string to use from configuration. Default is 'XformConnectionString'
+
+------------------------------------------------------------------------
+
+## Usage Example
+
+Apply to a controller action:
+
+``` csharp
+[DbContext]
+[HttpPost("create-order")]
+public IActionResult CreateOrder([FromServices] IOrderService orderService)
+{
+    orderService.CreateNewOrder();
+    return Ok("Order created successfully");
+}
+```
+
+Use without transactions:
+
+``` csharp
+[DbContext(executeInTransaction: false)]
+public IActionResult GetStatus()
+{
+    return Ok("Service running");
+}
+```
+
+Use a specific DB connection:
+
+``` csharp
+[DbContext(dbConnectionStringName: "ReadReplica")]
+public IActionResult GetReadOnlyData()
+{
+    return Ok("Read-only data");
+}
+```
+
+------------------------------------------------------------------------
+
+## Transaction Behavior
+
+| Outcome                    | Action                      |
+| -------------------------- | --------------------------- |
+| No exception + HTTP 200 OK | ✅ Commit transaction        |
+| Exception thrown           | 🔄 Rollback transaction     |
+| Non-200 response           | 🔄 Rollback transaction     |
+| Transaction disabled       | 🚫 No commit/rollback logic |
+
+------------------------------------------------------------------------
+
+
+
+
+
 # License
 
 MIT License. See the LICENSE file in the project root for details.
@@ -1197,9 +1293,9 @@ MIT License. See the LICENSE file in the project root for details.
 
 # Version History
 
-## Next
-- Added IDbContext to common services that are automatically injected in the host based on new configuration setting 'SqlConnectionSettings'.
-- 
+## 1.2.0
+- Added IDbContext (SqlDbContextProvider) to common services that are automatically injected in the host based on configuration setting 'ConnectionStrings'.
+
 ## 1.1.0
 - Added ICertificateProvider implementation and added it into auto-injected core implementations in ConsoleAppBuilder.CreateAppHostBuilder, WinFormsAppBuilder.CreateAppHostBuilder, and WebApiBuilder.CreateWebApplicationBuilder implementations.
 - Added unit tests around CertificateProvider, ConfigProxyProvider, and SequentialGuidProvider implementations.

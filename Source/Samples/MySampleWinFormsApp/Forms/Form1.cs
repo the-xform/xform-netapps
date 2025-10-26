@@ -20,7 +20,7 @@ internal partial class Form1 : Form
 		label1.Text = $"{guidProvider.NewGuid()}";
 
 		textBox1.Text += ($"MySampleSetting					: {config["MySampleSetting"]} {Environment.NewLine}");
-		textBox1.Text += ($"DbConnectionString				: {config["ConnectionStrings:DbConnectionString"]} {Environment.NewLine}");
+		textBox1.Text += ($"DbConnectionString				: {config["ConnectionStrings:Db1ConnectionString"]} {Environment.NewLine}");
 		textBox1.Text += ($"AdditionalConfigKey				: {config["AdditionalConfigKey"]} {Environment.NewLine}");
 		textBox1.Text += ($"DbContext1 ConnectionString		: {dbContext1.Connection?.ConnectionString} {Environment.NewLine}");
 		textBox1.Text += ($"DbContext2 ConnectionString		: {dbContext2.Connection?.ConnectionString} {Environment.NewLine}");

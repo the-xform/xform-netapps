@@ -161,7 +161,6 @@ public class SqlDbContextProvider : IDbContextProvider
 		}
 	}
 
-
 	/// <summary>
 	/// Disposes the transaction object and also closes the underlying connection.
 	/// </summary>

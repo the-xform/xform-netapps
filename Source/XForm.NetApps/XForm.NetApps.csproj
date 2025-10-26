@@ -9,7 +9,7 @@
 	  <!-- Nuget Settings -->
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	  <PackageId>XForm.NetApps</PackageId>
-	  <Version>1.1.0</Version>
+	  <Version>1.2.0</Version>
 	  <Authors>Rohit Ahuja</Authors>
 	  <Company>The XForm</Company>
 	  <Description>Wiring to build the application hosts for Console, Winforms, Windows Service, with injected services and additional configuration files, all via configurable way via appSettings.json.</Description>
@@ -18,6 +18,10 @@
 	  <RepositoryUrl>https://github.com/the-xform/xform-netapps</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ConfigurationSettings\DbConnectionSettings.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />

@@ -20,7 +20,8 @@ internal class SampleService : ISampleService
 	public SampleService(IConfiguration config,
 		ILogger<SampleService> logger,
 		[FromKeyedServices("Db1ConnectionString")] IDbContextProvider dbContext1,
-		[FromKeyedServices("Db2ConnectionString")] IDbContextProvider dbContext2)
+		[FromKeyedServices("Db2ConnectionString")] IDbContextProvider dbContext2
+		)
 	{
 		_config = config;
 		_logger = logger;
@@ -32,13 +33,13 @@ internal class SampleService : ISampleService
 	public void Run()
 	{
 		_logger.LogInformation($"MySampleSetting					: {_config["MySampleSetting"]}");
-		_logger.LogInformation($"DbConnectionString					: {_config["ConnectionStrings:DbConnectionString"]}");
+		_logger.LogInformation($"DbConnectionString					: {_config["ConnectionStrings:Db1ConnectionString"]}");
 		_logger.LogInformation($"AdditionalCommandLineConfigFileKey	: {_config["AdditionalCommandLineConfigFileKey"]}");
 		_logger.LogInformation($"DbContext1 ConnectionString		: {_dbContext1.Connection?.ConnectionString}");
 		_logger.LogInformation($"DbContext2 ConnectionString		: {_dbContext2.Connection?.ConnectionString}");
 
 		Console.WriteLine($"MySampleSetting							: {_config["MySampleSetting"]}");
-		Console.WriteLine($"DbConnectionString						: {_config["ConnectionStrings:DbConnectionString"]}");
+		Console.WriteLine($"DbConnectionString						: {_config["ConnectionStrings:Db1ConnectionString"]}");
 		Console.WriteLine($"AdditionalCommandLineConfigFileKey		: {_config["AdditionalCommandLineConfigFileKey"]}");
 		Console.WriteLine($"DbContext1 ConnectionString				: {_dbContext1.Connection?.ConnectionString}");
 		Console.WriteLine($"DbContext2 ConnectionString				: {_dbContext2.Connection?.ConnectionString}");
