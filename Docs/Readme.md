@@ -1,3 +1,35 @@
+# xform-netapps
+
+**xform-netapps** is a C# library providing reusable building blocks and helpers for creating .NET applications of various types (Console, WinForms, Web API). It offers common services (configuration, certificate handling, GUID generation, logging, json serialization and deserialization) and app builders to streamline application startup and hosting. It's a library to accelerate development and standardize application architecture across multiple .NET app types.
+
+------------------------------------------------------------------------
+
+## Features
+
+- Unified configuration support via `IConfiguration` (JSON, environment variables, `.exe.config`).  
+- Default certificate chain validation with customizable behavior.  
+- Reusable sequential GUID generator for database-friendly IDs.  
+- Ready-to-use builders for Console, WinForms, and Web API applications.  
+- Unit-tested components for certificates, configuration, and GUID generation.
+
+------------------------------------------------------------------------
+
+
+## Key Components & Features
+
+| Component / Class | Purpose / Responsibility |
+|------------------|------------------------|
+| **CertificateProvider** | Load and manage X.509 certificates from stores or memory. Validate certificates, check expiration, and validate chains. |
+| **ConfigProxyProvider** | Wrapper for reading configuration settings from `.exe.config`, JSON, and environment variables, with support for sensitive keys. |
+| **SequentialGuidProvider** | Generates sequential GUIDs optimized for database insertion and indexing. |
+| **ConsoleAppBuilder** | Helps build and configure console applications with pre-injected services like certificates and configuration. |
+| **WinFormsAppBuilder** | Similar to ConsoleAppBuilder, but for WinForms applications, providing a ready-to-use host and services. |
+| **WebApiBuilder** | Bootstraps Web API applications with default configuration, DI, and common services. |
+| **CommonAppBuilder / Shared Logic** | Underlying shared logic used by the builders for configuring logging, DI, configuration, and certificates. |
+
+
+------------------------------------------------------------------------
+
 # CertificateProvider Class Documentation
 
 > **Namespace:** `XForm.NetApps.Providers`  
@@ -515,7 +547,6 @@ string value = provider.GetAppSetting<string>("MissingKey", "default-value");
 
 **Namespace:** `XForm.NetApps.Providers`  
 **Implements:** `ISequentialGuidProvider`  
-**License:** MIT  
 
 
 ## Overview
@@ -1038,16 +1069,232 @@ app.Run();
 
 
 
+# SqlDbContextProvider
+
+**Namespace:** `XForm.NetApps.Providers`\
+**Implements:** `IDbContextProvider`\
+
+------------------------------------------------------------------------
+
+## Overview
+
+`SqlDbContextProvider` is a lightweight, disposable provider class for
+managing SQL Server database connections and transactions.\
+It encapsulates a `SqlConnection` and exposes methods to open/close
+connections, begin/commit/rollback transactions, and ensure proper
+disposal.
+
+This class is intended to be injected or used as a scoped database
+context within .NET applications.
+
+------------------------------------------------------------------------
+
+## Constructor
+
+``` csharp
+public SqlDbContextProvider(string name, string connectionString)
+```
+
+**Parameters** \| Name \| Type \| Description \|
+\|------\|------\|-------------\| \| `name` \| `string` \| A logical
+name identifying this context instance. \| \| `connectionString` \|
+`string` \| The connection string used to create the underlying
+`SqlConnection`. \|
+
+------------------------------------------------------------------------
+
+## Properties
+
+### `string Name`
+Gets the context name assigned at initialization.
+
+### `IDbConnection? Connection`
+The underlying SQL connection.
+
+### `bool IsInTransaction`
+Returns `true` if a transaction is active.
+
+### `IDbTransaction? CurrentTransaction`
+The active transaction object, if any.
+
+------------------------------------------------------------------------
+
+## Methods
+
+### `OpenConnection()`
+
+Opens the underlying SQL connection if it is closed.
+
+### `CloseConnection()`
+
+Closes the connection if it is open.
+
+### `BeginTransaction()`
+
+Begins a new SQL transaction. Throws if a transaction is already in
+progress or if the connection is uninitialized.
+
+### `CommitTransaction()`
+
+Commits the current transaction, if active.
+
+### `RollbackTransaction()`
+
+Rolls back the current transaction, if active.
+
+### `Dispose()`
+
+Releases all managed resources, rolls back any pending transactions, and
+disposes the connection.
+
+------------------------------------------------------------------------
+
+## Usage Example
+
+Adding named context providers in **.NET 8** using keyed
+services and then injecting them in the services/controllers.
+
+``` csharp
+builder.Services.AddKeyedSingleton<IDbContextProvider>("AppDb", (sp, key) =>
+    new SqlDbContextProvider("AppDb", builder.Configuration.GetConnectionString("AppDb"))
+);
+
+builder.Services.AddKeyedSingleton<IDbContextProvider>("LogsDb", (sp, key) =>
+    new SqlDbContextProvider("LogsDb", builder.Configuration.GetConnectionString("LogsDb"))
+);
+
+// Example usage in a controller
+public class UserController
+{
+    private readonly IDbContextProvider _db;
+    private readonly IDbContextProvider _logsDb;
+
+    public UserController([FromKeyedServices("AppDb")] IDbContextProvider db, [FromKeyedServices("LogsDb")] IDbContextProvider logsDb)
+    {
+        _db = db;
+        _logsDb = logsDb;
+    }
+}
+```
+
+------------------------------------------------------------------------
+
+
+
+
+
+# DbContextAttribute
+
+**Namespace:** `XForm.NetApps.Attibutes.Web`\
+
+------------------------------------------------------------------------
+
+## Overview
+
+The ``DbContextAttribute`` is an ASP.NET Core action filter designed to 
+manage database connection and transaction lifecycles for controller actions. 
+It automates opening, committing, rolling back, and closing database 
+connections and transactions based on the action’s execution outcome.
+
+------------------------------------------------------------------------
+
+## Features
+
+- Automatically opens a database connection before an action executes
+- Optionally wraps actions inside a transaction
+- Commits on HTTP 200 (success)
+- Rolls back on exceptions or failed responses
+- Closes the database connection after execution
+- Provides structured logging for lifecycle events
+- Supports multiple database connections using named connection strings
+
+------------------------------------------------------------------------
+
+## Constructor
+
+```csharp
+public DbContextAttribute(
+    bool executeInTransaction = true,
+    string dbConnectionStringName = "XformConnectionString"
+)
+```
+
+------------------------------------------------------------------------
+
+## Properties
+
+### `bool executeInTransaction`
+Determines if the action should be executed within a transaction.
+
+### `string dbConnectionStringName`
+Specifies the name of the connection string to use from configuration. Default is 'XformConnectionString'
+
+------------------------------------------------------------------------
+
+## Usage Example
+
+Apply to a controller action:
+
+``` csharp
+[DbContext]
+[HttpPost("create-order")]
+public IActionResult CreateOrder([FromServices] IOrderService orderService)
+{
+    orderService.CreateNewOrder();
+    return Ok("Order created successfully");
+}
+```
+
+Use without transactions:
+
+``` csharp
+[DbContext(executeInTransaction: false)]
+public IActionResult GetStatus()
+{
+    return Ok("Service running");
+}
+```
+
+Use a specific DB connection:
+
+``` csharp
+[DbContext(dbConnectionStringName: "ReadReplica")]
+public IActionResult GetReadOnlyData()
+{
+    return Ok("Read-only data");
+}
+```
+
+------------------------------------------------------------------------
+
+## Transaction Behavior
+
+| Outcome                    | Action                      |
+| -------------------------- | --------------------------- |
+| No exception + HTTP 200 OK | ✅ Commit transaction        |
+| Exception thrown           | 🔄 Rollback transaction     |
+| Non-200 response           | 🔄 Rollback transaction     |
+| Transaction disabled       | 🚫 No commit/rollback logic |
+
+------------------------------------------------------------------------
+
+
+
+
+
 # License
 
 MIT License. See the LICENSE file in the project root for details.
 
----
+------------------------------------------------------------------------
 
 
 
 
 # Version History
+
+## 1.2.0
+- Added IDbContext (SqlDbContextProvider) to common services that are automatically injected in the host based on configuration setting 'ConnectionStrings'.
 
 ## 1.1.0
 - Added ICertificateProvider implementation and added it into auto-injected core implementations in ConsoleAppBuilder.CreateAppHostBuilder, WinFormsAppBuilder.CreateAppHostBuilder, and WebApiBuilder.CreateWebApplicationBuilder implementations.
@@ -1063,4 +1310,4 @@ MIT License. See the LICENSE file in the project root for details.
 ## 1.0.0
 - Initial commit for the desired functionality in library.
 
----
+------------------------------------------------------------------------
